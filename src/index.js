@@ -1,11 +1,11 @@
 const { ApolloServer, gql, SchemaDirectiveVisitor, AuthenticationError } = require('apollo-server');
-const mongoose = require('mongoose');
+const dbConnect = require('../src/db/dbConnect');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const User = require('../src/models/user');
-const Post = require('../src/models/post');
-const Comment = require('../src/models/comment');
+const User = require('../src/db/models/user');
+const Post = require('../src/db/models/post');
+const Comment = require('../src/db/models/comment');
 
 const SECRET_APP = 'secret token';
 
@@ -23,9 +23,6 @@ function verifyToken(token) {
         return null;
     }
 }
-
-
-mongoose.Promise = global.Promise;
 
 
 // The GraphQL schema
@@ -209,10 +206,8 @@ class privateDirective extends SchemaDirectiveVisitor {
     }
 }
 
-
-mongoose.connect('mongodb://localhost/demoGoMyCode')
+dbConnect()
     .then(() => {
-        console.log('connected to MongoDB');
         const server = new ApolloServer({
             typeDefs,
             resolvers,
@@ -233,5 +228,5 @@ mongoose.connect('mongodb://localhost/demoGoMyCode')
         });
         server.listen().then(({ url }) => {
             console.log(`🚀  Server ready at ${url}`);
-        });
+        })
     })
